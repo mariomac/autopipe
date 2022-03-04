@@ -1,0 +1,50 @@
+# github.com/agext/levenshtein v1.2.1
+## explicit
+github.com/agext/levenshtein
+# github.com/apparentlymart/go-textseg/v13 v13.0.0
+## explicit; go 1.16
+github.com/apparentlymart/go-textseg/v13/textseg
+# github.com/google/go-cmp v0.3.1
+## explicit; go 1.8
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/flags
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
+# github.com/hashicorp/hcl/v2 v2.11.1
+## explicit; go 1.12
+github.com/hashicorp/hcl/v2
+github.com/hashicorp/hcl/v2/ext/customdecode
+github.com/hashicorp/hcl/v2/gohcl
+github.com/hashicorp/hcl/v2/hclsimple
+github.com/hashicorp/hcl/v2/hclsyntax
+github.com/hashicorp/hcl/v2/hclwrite
+github.com/hashicorp/hcl/v2/json
+# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
+## explicit
+github.com/mitchellh/go-wordwrap
+# github.com/netobserv/gopipes v0.1.1
+## explicit; go 1.17
+github.com/netobserv/gopipes/pkg/internal/connect
+github.com/netobserv/gopipes/pkg/internal/refl
+github.com/netobserv/gopipes/pkg/node
+# github.com/sirupsen/logrus v1.8.1
+## explicit; go 1.13
+github.com/sirupsen/logrus
+# github.com/zclconf/go-cty v1.8.0
+## explicit; go 1.12
+github.com/zclconf/go-cty/cty
+github.com/zclconf/go-cty/cty/convert
+github.com/zclconf/go-cty/cty/function
+github.com/zclconf/go-cty/cty/function/stdlib
+github.com/zclconf/go-cty/cty/gocty
+github.com/zclconf/go-cty/cty/json
+github.com/zclconf/go-cty/cty/set
+# golang.org/x/sys v0.0.0-20191026070338-33540a1f6037
+## explicit; go 1.12
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.5
+## explicit; go 1.11
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
