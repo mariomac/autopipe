@@ -14,7 +14,9 @@ The main points this proof of concept are trying to validate are:
 * A Functional approach to instantiate and configure each pipeline stage, simplifying and
   unifying the registration of pipe stages.
 
-Usage:
+The provided [example](./cmd) ingests HTTP JSONs, removes some "prohibited" fields, and prints the JSON in the standard output. It also prints the original JSON for debugging purposes.
+
+Running the example:
 
 ```
 go run cmd/autopipe.go -graph cmd/nodes.hcl
