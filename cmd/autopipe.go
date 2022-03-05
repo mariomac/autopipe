@@ -6,7 +6,8 @@ import (
 
 	"github.com/mariomac/autopipe/pkg/config"
 	"github.com/mariomac/autopipe/pkg/graph"
-	"github.com/mariomac/autopipe/pkg/stages"
+	"github.com/mariomac/autopipe/pkg/stage"
+	"github.com/mariomac/autopipe/pkg/stage/system"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,14 +22,15 @@ func main() {
 	builder := graph.NewBuilder()
 
 	// register codecs for automatic transformation between incompatible stages
-	builder.RegisterCodec(stages.BytesToStringCodec)
-	builder.RegisterCodec(stages.JSONBytesToMapCodec)
-	builder.RegisterCodec(stages.MapToStringCodec)
+	builder.RegisterCodec(stage.BytesToStringCodec)
+	builder.RegisterCodec(stage.JSONBytesToMapCodec)
+	builder.RegisterCodec(stage.MapToStringCodec)
 
 	// register the pipeline stages that are actually doing something
-	builder.RegisterIngest("http", stages.HttpIngestProvider)
-	builder.RegisterTransform("deleter", stages.FieldDeleterTransformProvider)
-	builder.RegisterExport("stdout", stages.StdOutExportProvider)
+	builder.RegisterIngest(stage.HttpIngestProvider)
+	builder.RegisterIngest(system.MonitorProvider)
+	builder.RegisterTransform(stage.FieldDeleterTransformProvider)
+	builder.RegisterExport(stage.StdOutExportProvider)
 
 	// Parse config and build graph from it
 	grp, err := os.Open(*graphFile)

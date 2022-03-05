@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/mariomac/autopipe/pkg/stages"
+	"github.com/mariomac/autopipe/pkg/stage"
 	"github.com/netobserv/gopipes/pkg/node"
 )
-
-type NodeType string
-type NodeName string
 
 type codecKey struct {
 	In  reflect.Type
@@ -20,12 +17,12 @@ type codecKey struct {
 // its stages given a name and a type, as well as connect them. If two connected stages have
 // incompatible types, it will insert a codec in between to translate between the stage types
 type Builder struct {
-	ingestBuilders    map[NodeType]stages.IngestProvider
-	transformBuilders map[NodeType]stages.TransformProvider
-	exportBuilders    map[NodeType]stages.ExportProvider
-	ingests           map[NodeName]*node.Init
-	transforms        map[NodeName]*node.Middle
-	exports           map[NodeName]*node.Terminal
+	ingestBuilders    map[stage.Type]stage.IngestProvider
+	transformBuilders map[stage.Type]stage.TransformProvider
+	exportBuilders    map[stage.Type]stage.ExportProvider
+	ingests           map[stage.Name]*node.Init
+	transforms        map[stage.Name]*node.Middle
+	exports           map[stage.Name]*node.Terminal
 	connects          map[string][]string
 	codecs            map[codecKey]node.MiddleFunc
 }
@@ -33,12 +30,12 @@ type Builder struct {
 func NewBuilder() *Builder {
 	return &Builder{
 		codecs:            map[codecKey]node.MiddleFunc{},
-		ingestBuilders:    map[NodeType]stages.IngestProvider{},
-		transformBuilders: map[NodeType]stages.TransformProvider{},
-		exportBuilders:    map[NodeType]stages.ExportProvider{},
-		ingests:           map[NodeName]*node.Init{},
-		transforms:        map[NodeName]*node.Middle{},
-		exports:           map[NodeName]*node.Terminal{},
+		ingestBuilders:    map[stage.Type]stage.IngestProvider{},
+		transformBuilders: map[stage.Type]stage.TransformProvider{},
+		exportBuilders:    map[stage.Type]stage.ExportProvider{},
+		ingests:           map[stage.Name]*node.Init{},
+		transforms:        map[stage.Name]*node.Middle{},
+		exports:           map[stage.Name]*node.Terminal{},
 		connects:          map[string][]string{},
 	}
 }
@@ -49,36 +46,36 @@ func (nb *Builder) RegisterCodec(middleFunc node.MiddleFunc) {
 	nb.codecs[codecKey{In: mn.InType(), Out: mn.OutType()}] = middleFunc
 }
 
-func (nb *Builder) RegisterIngest(t NodeType, b stages.IngestProvider) {
-	nb.ingestBuilders[t] = b
+func (nb *Builder) RegisterIngest(b stage.IngestProvider) {
+	nb.ingestBuilders[b.StageType] = b
 }
 
-func (nb *Builder) RegisterTransform(t NodeType, b stages.TransformProvider) {
-	nb.transformBuilders[t] = b
+func (nb *Builder) RegisterTransform(b stage.TransformProvider) {
+	nb.transformBuilders[b.StageType] = b
 }
 
-func (nb *Builder) RegisterExport(t NodeType, b stages.ExportProvider) {
-	nb.exportBuilders[t] = b
+func (nb *Builder) RegisterExport(b stage.ExportProvider) {
+	nb.exportBuilders[b.StageType] = b
 }
 
 // TODO: verify that name is not duplicate
-func (nb *Builder) Instantiate(n NodeName, t NodeType, args interface{}) error {
+func (nb *Builder) Instantiate(n stage.Name, t stage.Type, args interface{}) error {
 	if ib, ok := nb.ingestBuilders[t]; ok {
-		nb.ingests[n] = ib(args)
+		nb.ingests[n] = ib.Instantiator(args)
 		return nil
 	}
 	if tb, ok := nb.transformBuilders[t]; ok {
-		nb.transforms[n] = tb(args)
+		nb.transforms[n] = tb.Instantiator(args)
 		return nil
 	}
 	if eb, ok := nb.exportBuilders[t]; ok {
-		nb.exports[n] = eb(args)
+		nb.exports[n] = eb.Instantiator(args)
 		return nil
 	}
 	return fmt.Errorf("unknown node name %q for type %q", n, t)
 }
 
-func (nb *Builder) Connect(src, dst NodeName) error {
+func (nb *Builder) Connect(src, dst stage.Name) error {
 	// find source and destination stages
 	var srcNode node.Sender
 	var ok bool

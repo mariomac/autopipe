@@ -1,4 +1,4 @@
-# HCL Map defining connection between stages by their name
+# HCL Map defining connection between stage by their name
 connect = {
   server: ["rawPrinter", "secureFilter"]
   secureFilter: ["safePrinter"]
@@ -7,7 +7,7 @@ connect = {
 # Here comes the definition of each graph stage
 
 # Each graph stage is the type of the stage (http, stdout, deleter)
-# followed by the name of the stage (there might be multiple stages of the same type)
+# followed by the name of the stage (there might be multiple stage of the same type)
 # Inside, any configuration arguments for the stage should go
 
 # http is listening for POST JSONs and forwards them to the next stage of the

@@ -6,14 +6,16 @@ import (
 
 	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/mariomac/autopipe/pkg/graph"
-	"github.com/mariomac/autopipe/pkg/stages"
+	"github.com/mariomac/autopipe/pkg/stage"
+	"github.com/mariomac/autopipe/pkg/stage/system"
 	"github.com/sirupsen/logrus"
 )
 
 type PipeConfig struct {
-	Http    []stages.Http    `hcl:"http,block"`
-	StdOut  []stages.Stdout  `hcl:"stdout,block"`
-	Deleter []stages.Deleter `hcl:"deleter,block"`
+	Http    []stage.Http     `hcl:"http,block"`
+	StdOut  []stage.Stdout   `hcl:"stdout,block"`
+	Deleter []stage.Deleter  `hcl:"deleter,block"`
+	SysMon  []system.Monitor `hcl:"sysmon,block"`
 	Connect Connections      `hcl:"connect"`
 }
 
@@ -31,25 +33,30 @@ func ReadConfig(in io.Reader) (PipeConfig, error) {
 }
 
 func ApplyConfig(cfg *PipeConfig, builder *graph.Builder) {
-	// TODO: probably it's a better way to configure HCL to not have to iterate by all the stage types
+	// TODO: find a better way to configure from HCL without having to iterate all the stage types
 	for _, stg := range cfg.StdOut {
-		if err := builder.Instantiate(graph.NodeName(stg.Name), "stdout", stg); err != nil {
+		if err := builder.Instantiate(stage.Name(stg.Name), stage.StdOutExportProvider.StageType, stg); err != nil {
 			logrus.WithError(err).WithField("config", stg).Fatal("can't instantiate node")
 		}
 	}
 	for _, stg := range cfg.Http {
-		if err := builder.Instantiate(graph.NodeName(stg.Name), "http", stg); err != nil {
+		if err := builder.Instantiate(stage.Name(stg.Name), stage.HttpIngestProvider.StageType, stg); err != nil {
 			logrus.WithError(err).WithField("config", stg).Fatal("can't instantiate node")
 		}
 	}
 	for _, stg := range cfg.Deleter {
-		if err := builder.Instantiate(graph.NodeName(stg.Name), "deleter", stg); err != nil {
+		if err := builder.Instantiate(stage.Name(stg.Name), stage.FieldDeleterTransformProvider.StageType, stg); err != nil {
+			logrus.WithError(err).WithField("config", stg).Fatal("can't instantiate node")
+		}
+	}
+	for _, stg := range cfg.SysMon {
+		if err := builder.Instantiate(stage.Name(stg.Name), system.MonitorProvider.StageType, stg); err != nil {
 			logrus.WithError(err).WithField("config", stg).Fatal("can't instantiate node")
 		}
 	}
 	for src, dsts := range cfg.Connect {
 		for _, dst := range dsts {
-			if err := builder.Connect(graph.NodeName(src), graph.NodeName(dst)); err != nil {
+			if err := builder.Connect(stage.Name(src), stage.Name(dst)); err != nil {
 				logrus.WithError(err).
 					WithFields(logrus.Fields{"src": src, "dst": dst}).
 					Fatal("can't connect stages")
